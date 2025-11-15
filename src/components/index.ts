@@ -20,3 +20,6 @@ export { TemplateCard } from './TemplateCard';
 export type { TemplateCardProps } from './TemplateCard';
 
 export { AudioLevelMeter } from './AudioLevelMeter';
+
+export { PlaybackControls } from './PlaybackControls';
+export type { PlaybackControlsProps } from './PlaybackControls';

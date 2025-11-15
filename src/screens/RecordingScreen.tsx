@@ -23,7 +23,6 @@ import {
   updateAudioLevel,
   resetAudio,
 } from '@store/audioSlice';
-import { addEpisode, addProject } from '@store/projectsSlice';
 import { AudioRecorder, RecordingStatus } from '@services';
 import { Button, Card, AudioLevelMeter, LoadingSpinner } from '@components';
 
@@ -42,8 +41,6 @@ export const RecordingScreen: React.FC = () => {
   );
 
   const [isInitializing, setIsInitializing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [recordingUri, setRecordingUri] = useState<string | null>(null);
   const audioRecorderRef = useRef<AudioRecorder | null>(null);
 
   // Initialize audio recorder
@@ -121,9 +118,19 @@ export const RecordingScreen: React.FC = () => {
   const handleStopRecording = async () => {
     try {
       const uri = await audioRecorderRef.current?.stopRecording();
-      if (uri) {
-        setRecordingUri(uri);
+      if (uri && template) {
         dispatch(stopRecording());
+
+        // Get the recording duration
+        const duration = recordingDuration || 0;
+
+        // Navigate to preview screen
+        navigation.navigate('RecordingPreview', {
+          recordingUri: uri,
+          templateId: template.id,
+          templateName: template.name,
+          duration,
+        });
       }
     } catch (error) {
       console.error('Failed to stop recording:', error);
@@ -147,8 +154,6 @@ export const RecordingScreen: React.FC = () => {
             try {
               if (isRecording) {
                 await audioRecorderRef.current?.discardRecording();
-              } else if (recordingUri) {
-                await audioRecorderRef.current?.discardRecording();
               }
               dispatch(resetAudio());
               navigation.goBack();
@@ -161,83 +166,6 @@ export const RecordingScreen: React.FC = () => {
     );
   };
 
-  const handleSaveRecording = async () => {
-    if (!recordingUri || !template) {
-      Alert.alert('Error', 'No recording to save');
-      return;
-    }
-
-    try {
-      setIsSaving(true);
-
-      // Generate IDs for project and episode
-      const projectId = `project_${Date.now()}`;
-      const episodeId = `episode_${Date.now()}`;
-
-      // Save recording to permanent storage
-      const permanentUri = await audioRecorderRef.current?.saveRecording(
-        recordingUri,
-        projectId,
-        episodeId,
-        template.audioSettings.format
-      );
-
-      if (!permanentUri) {
-        throw new Error('Failed to save recording');
-      }
-
-      // Get recording duration
-      const duration =
-        (await audioRecorderRef.current?.getRecordingDuration(permanentUri)) || 0;
-
-      // Create a new project
-      dispatch(
-        addProject({
-          id: projectId,
-          name: `Podcast ${new Date().toLocaleDateString()}`,
-          description: '',
-          coverImage: null,
-          category: template.category,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-          episodes: [],
-        })
-      );
-
-      // Add episode to the project
-      dispatch(
-        addEpisode({
-          projectId,
-          episode: {
-            id: episodeId,
-            title: `Recording ${new Date().toLocaleTimeString()}`,
-            description: '',
-            duration,
-            recordedAt: Date.now(),
-            fileUri: permanentUri,
-            waveformData: null,
-            status: 'draft',
-            templateId: template.id,
-          },
-        })
-      );
-
-      Alert.alert('Success', 'Recording saved successfully', [
-        {
-          text: 'OK',
-          onPress: () => {
-            dispatch(resetAudio());
-            navigation.navigate('Main');
-          },
-        },
-      ]);
-    } catch (error) {
-      console.error('Failed to save recording:', error);
-      Alert.alert('Error', 'Failed to save recording');
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const formatDuration = (milliseconds: number): string => {
     const totalSeconds = Math.floor(milliseconds / 1000);
@@ -300,14 +228,12 @@ export const RecordingScreen: React.FC = () => {
           </View>
         </Card>
 
-        {isInitializing || isSaving ? (
+        {isInitializing ? (
           <View style={styles.loadingContainer}>
             <LoadingSpinner size="large" />
-            <Text style={styles.loadingText}>
-              {isInitializing ? 'Initializing...' : 'Saving recording...'}
-            </Text>
+            <Text style={styles.loadingText}>Initializing...</Text>
           </View>
-        ) : !isRecording && !recordingUri ? (
+        ) : !isRecording ? (
           <View style={styles.controls}>
             <TouchableOpacity
               style={styles.recordButton}
@@ -318,7 +244,7 @@ export const RecordingScreen: React.FC = () => {
             </TouchableOpacity>
             <Text style={styles.controlText}>Tap to start recording</Text>
           </View>
-        ) : isRecording ? (
+        ) : (
           <View style={styles.controls}>
             <View style={styles.recordingControls}>
               <TouchableOpacity
@@ -337,20 +263,6 @@ export const RecordingScreen: React.FC = () => {
                 <Text style={styles.controlButtonText}>⏹</Text>
               </TouchableOpacity>
             </View>
-          </View>
-        ) : (
-          <View style={styles.actions}>
-            <Button
-              title="Discard"
-              onPress={handleDiscardRecording}
-              variant="outline"
-              style={styles.actionButton}
-            />
-            <Button
-              title="Save Recording"
-              onPress={handleSaveRecording}
-              style={styles.actionButton}
-            />
           </View>
         )}
       </View>

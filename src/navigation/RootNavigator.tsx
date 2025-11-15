@@ -2,7 +2,7 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { RootStackParamList } from './types';
 import { TabNavigator } from './TabNavigator';
-import { RecordingScreen } from '@screens';
+import { RecordingScreen, RecordingPreviewScreen } from '@screens';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -20,6 +20,15 @@ export const RootNavigator: React.FC = () => {
         options={{
           headerShown: true,
           title: 'Recording',
+          headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="RecordingPreview"
+        component={RecordingPreviewScreen}
+        options={{
+          headerShown: true,
+          title: 'Preview',
           headerBackTitle: 'Back',
         }}
       />
