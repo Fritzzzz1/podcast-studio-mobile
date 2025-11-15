@@ -2,7 +2,12 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { RootStackParamList } from './types';
 import { TabNavigator } from './TabNavigator';
-import { RecordingScreen, RecordingPreviewScreen } from '@screens';
+import {
+  RecordingScreen,
+  RecordingPreviewScreen,
+  ProjectDetailScreen,
+  EpisodeDetailScreen,
+} from '@screens';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -32,9 +37,25 @@ export const RootNavigator: React.FC = () => {
           headerBackTitle: 'Back',
         }}
       />
+      <Stack.Screen
+        name="ProjectDetail"
+        component={ProjectDetailScreen}
+        options={{
+          headerShown: true,
+          title: 'Project',
+          headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="EpisodeDetail"
+        component={EpisodeDetailScreen}
+        options={{
+          headerShown: true,
+          title: 'Episode',
+          headerBackTitle: 'Back',
+        }}
+      />
       {/* Additional stack screens will be added here for:
-          - ProjectDetail
-          - EpisodeDetail
           - TemplateDetail
           - CreateProject
           - CreateTemplate
