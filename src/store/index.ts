@@ -5,6 +5,7 @@ import audioReducer from './audioSlice';
 import projectsReducer from './projectsSlice';
 import templatesReducer from './templatesSlice';
 import settingsReducer from './settingsSlice';
+import editorReducer from './editorSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     projects: projectsReducer,
     templates: templatesReducer,
     settings: settingsReducer,
+    editor: editorReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

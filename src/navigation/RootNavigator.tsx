@@ -7,6 +7,7 @@ import {
   RecordingPreviewScreen,
   ProjectDetailScreen,
   EpisodeDetailScreen,
+  EditorScreen,
 } from '@screens';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -53,6 +54,14 @@ export const RootNavigator: React.FC = () => {
           headerShown: true,
           title: 'Episode',
           headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="Editor"
+        component={EditorScreen}
+        options={{
+          headerShown: false,
+          presentation: 'modal',
         }}
       />
       {/* Additional stack screens will be added here for:

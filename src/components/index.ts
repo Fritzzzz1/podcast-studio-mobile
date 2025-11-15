@@ -29,3 +29,7 @@ export type { ProjectCardProps } from './ProjectCard';
 
 export { EpisodeCard } from './EpisodeCard';
 export type { EpisodeCardProps } from './EpisodeCard';
+
+export { AudioWaveform } from './AudioWaveform';
+
+export { Slider } from './Slider';

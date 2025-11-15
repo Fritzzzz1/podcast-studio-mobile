@@ -22,6 +22,7 @@ export type RootStackParamList = {
   };
   ProjectDetail: { projectId: string };
   EpisodeDetail: { projectId: string; episodeId: string };
+  Editor: { projectId: string; episodeId: string };
   TemplateDetail: { templateId: string };
   CreateProject: undefined;
   CreateTemplate: undefined;
