@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { TemplatesScreenNavigationProp } from '@types/navigation';
+import { TemplatesScreenNavigationProp } from '@navigation/types';
 import { colors, spacing, typography } from '@theme';
 import { useAppSelector, useAppDispatch } from '@store';
 import { selectTemplate } from '@store/templatesSlice';
@@ -59,8 +59,9 @@ export const TemplatesScreen: React.FC = () => {
         <Button
           title="Start Recording"
           onPress={() => {
-            // Navigate to recording screen when implemented
-            // navigation.navigate('Recording', { templateId: selectedTemplateId });
+            if (selectedTemplateId) {
+              navigation.navigate('Recording', { templateId: selectedTemplateId });
+            }
           }}
           fullWidth
           disabled={!selectedTemplateId}

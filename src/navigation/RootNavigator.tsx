@@ -1,7 +1,8 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { RootStackParamList } from '@types/navigation';
+import { RootStackParamList } from './types';
 import { TabNavigator } from './TabNavigator';
+import { RecordingScreen } from '@screens';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -13,8 +14,16 @@ export const RootNavigator: React.FC = () => {
       }}
     >
       <Stack.Screen name="Main" component={TabNavigator} />
+      <Stack.Screen
+        name="Recording"
+        component={RecordingScreen}
+        options={{
+          headerShown: true,
+          title: 'Recording',
+          headerBackTitle: 'Back',
+        }}
+      />
       {/* Additional stack screens will be added here for:
-          - Recording
           - ProjectDetail
           - EpisodeDetail
           - TemplateDetail

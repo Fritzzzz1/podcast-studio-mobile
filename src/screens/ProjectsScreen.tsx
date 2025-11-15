@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { ProjectsScreenNavigationProp } from '@types/navigation';
+import { ProjectsScreenNavigationProp } from '@navigation/types';
 import { colors, spacing, typography } from '@theme';
 
 export const ProjectsScreen: React.FC = () => {

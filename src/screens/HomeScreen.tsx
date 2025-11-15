@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { HomeScreenNavigationProp } from '@types/navigation';
+import { HomeScreenNavigationProp } from '@navigation/types';
 import { colors, spacing, typography, borderRadius, shadows } from '@theme';
 import { useAppSelector } from '@store';
 import { Button, Card, EmptyState } from '@components';
@@ -29,8 +29,9 @@ export const HomeScreen: React.FC = () => {
         <Button
           title="🎙️ Start Recording"
           onPress={() => {
-            // Navigate to recording screen when implemented
-            // navigation.navigate('Recording', { templateId: selectedTemplate?.id || 'solo-podcast' });
+            navigation.navigate('Recording', {
+              templateId: selectedTemplate?.id || 'solo-podcast',
+            });
           }}
           size="lg"
           fullWidth
@@ -97,7 +98,9 @@ export const HomeScreen: React.FC = () => {
             description="Start your first podcast recording to see it here"
             actionLabel="Start Recording"
             onAction={() => {
-              // Navigate to recording
+              navigation.navigate('Recording', {
+                templateId: selectedTemplate?.id || 'solo-podcast',
+              });
             }}
           />
         </View>

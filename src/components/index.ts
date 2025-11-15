@@ -18,3 +18,5 @@ export type { ProgressBarProps } from './ProgressBar';
 
 export { TemplateCard } from './TemplateCard';
 export type { TemplateCardProps } from './TemplateCard';
+
+export { AudioLevelMeter } from './AudioLevelMeter';

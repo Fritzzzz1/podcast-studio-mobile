@@ -33,6 +33,8 @@ export const colors = {
   backgroundDark: '#0A0A0B',
   backgroundSecondary: '#F7F7F8',
   backgroundSecondaryDark: '#1C1C1E',
+  surface: '#FFFFFF',
+  surfaceDark: '#1C1C1E',
 
   // Text Colors
   textPrimary: '#0A0A0B',
