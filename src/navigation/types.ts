@@ -14,6 +14,12 @@ export type MainTabParamList = {
 export type RootStackParamList = {
   Main: undefined;
   Recording: { templateId: string };
+  RecordingPreview: {
+    recordingUri: string;
+    templateId: string;
+    templateName: string;
+    duration: number;
+  };
   ProjectDetail: { projectId: string };
   EpisodeDetail: { projectId: string; episodeId: string };
   TemplateDetail: { templateId: string };
