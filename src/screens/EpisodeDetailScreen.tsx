@@ -302,6 +302,12 @@ export const EpisodeDetailScreen: React.FC = () => {
 
       <View style={styles.actions}>
         <Button
+          title="Edit Audio"
+          onPress={() => navigation.navigate('Editor', { projectId, episodeId })}
+          fullWidth
+          style={styles.actionButton}
+        />
+        <Button
           title="Delete Episode"
           onPress={handleDeleteEpisode}
           variant="outline"
@@ -393,6 +399,10 @@ const styles = StyleSheet.create({
   },
   actions: {
     marginBottom: spacing.xl,
+    gap: spacing.md,
+  },
+  actionButton: {
+    marginBottom: spacing.sm,
   },
   errorText: {
     fontSize: typography.fontSize.lg,
