@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { colors, spacing, typography } from '@theme';
+import { formatDuration } from '../utils/timeFormatters';
 
 export interface PlaybackControlsProps {
   isPlaying: boolean;
@@ -30,17 +31,6 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   onSpeedChange,
   disabled = false,
 }) => {
-  const formatTime = (milliseconds: number): string => {
-    const totalSeconds = Math.floor(milliseconds / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    if (hours > 0) {
-      return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    }
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
 
   const handleSpeedPress = () => {
     const currentIndex = PLAYBACK_SPEEDS.indexOf(playbackSpeed);
@@ -64,8 +54,8 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           disabled={disabled || duration === 0}
         />
         <View style={styles.timeContainer}>
-          <Text style={styles.timeText}>{formatTime(currentPosition)}</Text>
-          <Text style={styles.timeText}>{formatTime(duration)}</Text>
+          <Text style={styles.timeText}>{formatDuration(currentPosition)}</Text>
+          <Text style={styles.timeText}>{formatDuration(duration)}</Text>
         </View>
       </View>
 

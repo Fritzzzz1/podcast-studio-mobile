@@ -1,26 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Alert } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { colors, spacing, typography } from '@theme';
 import { useAppDispatch } from '@store';
 import { addEpisode, addProject } from '@store/projectsSlice';
 import { resetAudio } from '@store/audioSlice';
 import { AudioPlayer, PlaybackStatus } from '@services';
 import { Button, Card, PlaybackControls, LoadingSpinner } from '@components';
+import { RootStackParamList } from '../navigation/types';
 
-interface RecordingPreviewScreenParams {
-  recordingUri: string;
-  templateId: string;
-  templateName: string;
-  duration: number;
-}
+type RecordingPreviewScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'RecordingPreview'
+>;
+type RecordingPreviewScreenRouteProp = RouteProp<
+  RootStackParamList,
+  'RecordingPreview'
+>;
 
 export const RecordingPreviewScreen: React.FC = () => {
-  const navigation = useNavigation<any>();
-  const route = useRoute<any>();
+  const navigation = useNavigation<RecordingPreviewScreenNavigationProp>();
+  const route = useRoute<RecordingPreviewScreenRouteProp>();
   const dispatch = useAppDispatch();
 
-  const { recordingUri, templateId, templateName, duration } = route.params as RecordingPreviewScreenParams;
+  const { recordingUri, templateId, templateName, duration } = route.params;
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentPosition, setCurrentPosition] = useState(0);

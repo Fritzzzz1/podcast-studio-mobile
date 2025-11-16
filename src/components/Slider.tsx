@@ -89,6 +89,6 @@ const styles = StyleSheet.create({
   },
   rangeText: {
     fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.textPrimarySecondary,
+    color: theme.colors.textSecondary,
   },
 });

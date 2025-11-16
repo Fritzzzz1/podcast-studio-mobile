@@ -278,14 +278,24 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({ route, navigation })
           <Text style={styles.sectionTitle}>Playback</Text>
           <PlaybackControls
             isPlaying={editor.isPlaying}
-            currentTime={editor.currentPosition}
+            currentPosition={editor.currentPosition}
             duration={editor.duration}
+            playbackSpeed={1.0}
             onPlayPause={() => {
               // Playback will be implemented with AudioPlayer integration
               console.log('Playback toggle');
             }}
             onSeek={(position) => {
               console.log('Seek to:', position);
+            }}
+            onSkipForward={() => {
+              console.log('Skip forward');
+            }}
+            onSkipBackward={() => {
+              console.log('Skip backward');
+            }}
+            onSpeedChange={(speed) => {
+              console.log('Speed change:', speed);
             }}
           />
         </View>

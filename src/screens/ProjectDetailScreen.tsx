@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import {  ProjectDetailScreenNavigationProp,
   ProjectDetailScreenRouteProp,
@@ -8,6 +8,12 @@ import { colors, spacing, typography, borderRadius, shadows } from '@theme';
 import { useAppSelector, useAppDispatch } from '@store';
 import { deleteProject, deleteEpisode } from '@store/projectsSlice';
 import { Button, EpisodeCard, EmptyState, Card } from '@components';
+import {
+  formatDate,
+  formatTotalDuration,
+  calculateTotalDuration,
+  showDeleteConfirmation,
+} from '../utils';
 
 export const ProjectDetailScreen: React.FC = () => {
   const navigation = useNavigation<ProjectDetailScreenNavigationProp>();
@@ -24,43 +30,23 @@ export const ProjectDetailScreen: React.FC = () => {
   };
 
   const handleDeleteProject = () => {
-    Alert.alert(
+    showDeleteConfirmation(
       'Delete Project',
       'Are you sure you want to delete this project and all its episodes? This action cannot be undone.',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            dispatch(deleteProject(projectId));
-            navigation.goBack();
-          },
-        },
-      ]
+      () => {
+        dispatch(deleteProject(projectId));
+        navigation.goBack();
+      }
     );
   };
 
   const handleDeleteEpisode = (episodeId: string) => {
-    Alert.alert(
+    showDeleteConfirmation(
       'Delete Episode',
       'Are you sure you want to delete this episode? This action cannot be undone.',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            dispatch(deleteEpisode({ projectId, episodeId }));
-          },
-        },
-      ]
+      () => {
+        dispatch(deleteEpisode({ projectId, episodeId }));
+      }
     );
   };
 
@@ -77,25 +63,6 @@ export const ProjectDetailScreen: React.FC = () => {
     );
   }
 
-  const formatDate = (timestamp: number): string => {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
-
-  const getTotalDuration = (): string => {
-    const totalMs = project.episodes.reduce((acc, ep) => acc + ep.duration, 0);
-    const totalMin = Math.floor(totalMs / 60000);
-    if (totalMin < 60) {
-      return `${totalMin} minutes`;
-    }
-    const hours = Math.floor(totalMin / 60);
-    const mins = totalMin % 60;
-    return `${hours} hour${hours !== 1 ? 's' : ''} ${mins} minute${mins !== 1 ? 's' : ''}`;
-  };
 
   return (
     <View style={styles.container}>
@@ -135,17 +102,17 @@ export const ProjectDetailScreen: React.FC = () => {
                 </View>
                 <View style={styles.statDivider} />
                 <View style={styles.statItem}>
-                  <Text style={styles.statValue}>{getTotalDuration()}</Text>
+                  <Text style={styles.statValue}>{formatTotalDuration(calculateTotalDuration(project.episodes))}</Text>
                   <Text style={styles.statLabel}>Total Duration</Text>
                 </View>
               </View>
 
               <View style={styles.meta}>
                 <Text style={styles.metaText}>
-                  Created {formatDate(project.createdAt)}
+                  Created {formatDate(project.createdAt, 'long')}
                 </Text>
                 <Text style={styles.metaText}>
-                  Updated {formatDate(project.updatedAt)}
+                  Updated {formatDate(project.updatedAt, 'long')}
                 </Text>
               </View>
 
