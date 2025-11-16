@@ -64,6 +64,12 @@ const settingsSlice = createSlice({
     toggleHapticFeedback: (state) => {
       state.hapticFeedback = !state.hapticFeedback;
     },
+    toggleAnalytics: (state) => {
+      state.analyticsEnabled = !state.analyticsEnabled;
+    },
+    toggleCrashReporting: (state) => {
+      state.crashReportingEnabled = !state.crashReportingEnabled;
+    },
     resetSettings: () => initialState,
   },
 });
@@ -75,6 +81,8 @@ export const {
   toggleAutoEnhancement,
   toggleNotifications,
   toggleHapticFeedback,
+  toggleAnalytics,
+  toggleCrashReporting,
   resetSettings,
 } = settingsSlice.actions;
 

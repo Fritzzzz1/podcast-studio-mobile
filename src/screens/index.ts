@@ -7,3 +7,4 @@ export { RecordingPreviewScreen } from './RecordingPreviewScreen';
 export { ProjectDetailScreen } from './ProjectDetailScreen';
 export { EpisodeDetailScreen } from './EpisodeDetailScreen';
 export { EditorScreen } from './EditorScreen';
+export { ExportScreen } from './ExportScreen';

@@ -8,6 +8,7 @@ import {
   ProjectDetailScreen,
   EpisodeDetailScreen,
   EditorScreen,
+  ExportScreen,
 } from '@screens';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -59,6 +60,14 @@ export const RootNavigator: React.FC = () => {
       <Stack.Screen
         name="Editor"
         component={EditorScreen}
+        options={{
+          headerShown: false,
+          presentation: 'modal',
+        }}
+      />
+      <Stack.Screen
+        name="Export"
+        component={ExportScreen}
         options={{
           headerShown: false,
           presentation: 'modal',

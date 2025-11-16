@@ -25,9 +25,10 @@ import {
   FadeEffect,
 } from '../store/editorSlice';
 import { updateEpisode } from '../store/projectsSlice';
-import { AudioEditor } from '../services';
+import { AudioEditor, AudioEnhancer, EnhancementPreset } from '../services';
 import { Button, AudioWaveform, Slider, PlaybackControls } from '../components';
 import { theme } from '../theme';
+import { EffectSettings } from '../store/templatesSlice';
 
 type EditorScreenProps = NativeStackScreenProps<RootStackParamList, 'Editor'>;
 
@@ -44,6 +45,17 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({ route, navigation })
   const [volumeLevel, setVolumeLevel] = useState<number>(0);
   const [fadeIn, setFadeIn] = useState<number>(0);
   const [fadeOut, setFadeOut] = useState<number>(0);
+
+  // Enhancement state
+  const [selectedPreset, setSelectedPreset] = useState<EnhancementPreset>('medium');
+  const [enhancementSettings, setEnhancementSettings] = useState<EffectSettings>({
+    noiseReduction: { enabled: true, level: 0.5 },
+    normalization: { enabled: true, targetLevel: -16 },
+    compression: { enabled: true, threshold: -18, ratio: 3 },
+    eq: { preset: 'voice' },
+  });
+  const [isEnhancing, setIsEnhancing] = useState(false);
+  const [enhancementProgress, setEnhancementProgress] = useState(0);
 
   // Find project and episode
   const project = projects.find((p) => p.id === projectId);
@@ -138,6 +150,76 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({ route, navigation })
 
   const handleClearEffect = (effectId: string) => {
     dispatch(removeEffect(effectId));
+  };
+
+  const handlePresetChange = (preset: EnhancementPreset) => {
+    setSelectedPreset(preset);
+    const presets = AudioEnhancer.getPresets();
+    const presetConfig = presets[preset];
+
+    setEnhancementSettings({
+      noiseReduction: {
+        enabled: true,
+        level: presetConfig.noiseReduction.level,
+      },
+      normalization: {
+        enabled: true,
+        targetLevel: presetConfig.normalization.targetLevel,
+      },
+      compression: {
+        enabled: true,
+        threshold: presetConfig.compression.threshold,
+        ratio: presetConfig.compression.ratio,
+      },
+      eq: {
+        preset: presetConfig.eq.preset,
+      },
+    });
+  };
+
+  const handleApplyEnhancement = async () => {
+    if (!editor.audioUri || !episode) {
+      Alert.alert('Error', 'No audio file loaded');
+      return;
+    }
+
+    try {
+      setIsEnhancing(true);
+      setEnhancementProgress(0);
+
+      const enhancedUri = await AudioEnhancer.enhanceAudio(
+        editor.audioUri,
+        enhancementSettings,
+        (progress) => {
+          setEnhancementProgress(progress);
+        }
+      );
+
+      // Update episode with enhanced file
+      dispatch(
+        updateEpisode({
+          projectId,
+          episodeId,
+          updates: {
+            fileUri: enhancedUri,
+            status: 'processed',
+          },
+        })
+      );
+
+      // Reload waveform with enhanced audio
+      await loadWaveform(enhancedUri);
+
+      setIsEnhancing(false);
+      setEnhancementProgress(0);
+
+      Alert.alert('Success', 'Audio enhancement applied successfully!');
+    } catch (error) {
+      console.error('Enhancement error:', error);
+      setIsEnhancing(false);
+      setEnhancementProgress(0);
+      Alert.alert('Error', 'Failed to enhance audio. Please try again.');
+    }
   };
 
   const handleExport = async () => {
@@ -360,6 +442,88 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({ route, navigation })
           />
         </View>
 
+        {/* Audio Enhancement */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Audio Enhancement</Text>
+          <Text style={styles.description}>
+            Apply professional audio processing to improve quality
+          </Text>
+
+          {/* Preset Selector */}
+          <View style={styles.presetContainer}>
+            <Text style={styles.label}>Enhancement Preset:</Text>
+            <View style={styles.presetButtons}>
+              {(['light', 'medium', 'heavy', 'custom'] as EnhancementPreset[]).map(
+                (preset) => (
+                  <TouchableOpacity
+                    key={preset}
+                    style={[
+                      styles.presetButton,
+                      selectedPreset === preset && styles.presetButtonActive,
+                    ]}
+                    onPress={() => handlePresetChange(preset)}
+                  >
+                    <Text
+                      style={[
+                        styles.presetButtonText,
+                        selectedPreset === preset && styles.presetButtonTextActive,
+                      ]}
+                    >
+                      {preset.charAt(0).toUpperCase() + preset.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                )
+              )}
+            </View>
+          </View>
+
+          {/* Enhancement Settings Display */}
+          <View style={styles.enhancementSettings}>
+            <View style={styles.settingRow}>
+              <Text style={styles.settingLabel}>Noise Reduction:</Text>
+              <Text style={styles.settingValue}>
+                {enhancementSettings.noiseReduction.enabled
+                  ? `${(enhancementSettings.noiseReduction.level * 100).toFixed(0)}%`
+                  : 'Off'}
+              </Text>
+            </View>
+            <View style={styles.settingRow}>
+              <Text style={styles.settingLabel}>Normalization:</Text>
+              <Text style={styles.settingValue}>
+                {enhancementSettings.normalization.enabled
+                  ? `${enhancementSettings.normalization.targetLevel} LUFS`
+                  : 'Off'}
+              </Text>
+            </View>
+            <View style={styles.settingRow}>
+              <Text style={styles.settingLabel}>Compression:</Text>
+              <Text style={styles.settingValue}>
+                {enhancementSettings.compression.enabled
+                  ? `${enhancementSettings.compression.ratio}:1`
+                  : 'Off'}
+              </Text>
+            </View>
+            <View style={styles.settingRow}>
+              <Text style={styles.settingLabel}>EQ Preset:</Text>
+              <Text style={styles.settingValue}>
+                {enhancementSettings.eq.preset.charAt(0).toUpperCase() +
+                  enhancementSettings.eq.preset.slice(1)}
+              </Text>
+            </View>
+          </View>
+
+          <Button
+            title={
+              isEnhancing
+                ? `Enhancing... ${Math.round(enhancementProgress)}%`
+                : 'Apply Enhancement'
+            }
+            onPress={handleApplyEnhancement}
+            disabled={isEnhancing}
+            variant="secondary"
+          />
+        </View>
+
         {/* Active Effects List */}
         {editor.effects.length > 0 && (
           <View style={styles.section}>
@@ -421,7 +585,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   backButton: {
-    fontSize: theme.typography.fontSize.md,
+    fontSize: theme.typography.fontSize.base,
     color: theme.colors.primary,
     marginBottom: theme.spacing.xs,
   },
@@ -480,7 +644,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xs,
   },
   effectType: {
-    fontSize: theme.typography.fontSize.md,
+    fontSize: theme.typography.fontSize.base,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.textPrimary,
   },
@@ -496,5 +660,59 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: theme.typography.fontSize.lg,
     color: theme.colors.error,
+  },
+  presetContainer: {
+    marginBottom: theme.spacing.md,
+  },
+  label: {
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.medium,
+    color: theme.colors.textPrimary,
+    marginBottom: theme.spacing.xs,
+  },
+  presetButtons: {
+    flexDirection: 'row',
+    gap: theme.spacing.xs,
+    flexWrap: 'wrap',
+  },
+  presetButton: {
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    borderRadius: 8,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.surface,
+  },
+  presetButtonActive: {
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
+  },
+  presetButtonText: {
+    fontSize: theme.typography.fontSize.sm,
+    fontWeight: theme.typography.fontWeight.medium,
+    color: theme.colors.textPrimary,
+  },
+  presetButtonTextActive: {
+    color: '#FFFFFF',
+  },
+  enhancementSettings: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 8,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.md,
+  },
+  settingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: theme.spacing.xs,
+  },
+  settingLabel: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.textSecondary,
+  },
+  settingValue: {
+    fontSize: theme.typography.fontSize.sm,
+    fontWeight: theme.typography.fontWeight.medium,
+    color: theme.colors.textPrimary,
   },
 });

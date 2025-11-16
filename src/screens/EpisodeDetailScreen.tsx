@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import {
   EpisodeDetailScreenNavigationProp,
@@ -279,6 +279,21 @@ export const EpisodeDetailScreen: React.FC = () => {
         <Button
           title="Edit Audio"
           onPress={() => navigation.navigate('Editor', { projectId, episodeId })}
+          fullWidth
+          style={styles.actionButton}
+        />
+        <Button
+          title="Export Audio"
+          onPress={() =>
+            navigation.navigate('Export', {
+              projectId,
+              episodeId,
+              audioUri: episode.fileUri,
+              episodeTitle: episode.title,
+              duration: episode.duration,
+            })
+          }
+          variant="secondary"
           fullWidth
           style={styles.actionButton}
         />
