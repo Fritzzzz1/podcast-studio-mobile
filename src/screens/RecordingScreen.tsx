@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Alert,
   TouchableOpacity,
   Platform,
 } from 'react-native';
@@ -25,6 +24,7 @@ import {
 } from '@store/audioSlice';
 import { AudioRecorder, RecordingStatus } from '@services';
 import { Button, Card, AudioLevelMeter, LoadingSpinner } from '@components';
+import { formatDuration, showDeleteConfirmation, showErrorAlert } from '../utils';
 
 export const RecordingScreen: React.FC = () => {
   const navigation = useNavigation<RecordingScreenNavigationProp>();
@@ -139,45 +139,24 @@ export const RecordingScreen: React.FC = () => {
   };
 
   const handleDiscardRecording = () => {
-    Alert.alert(
+    showDeleteConfirmation(
       'Discard Recording',
       'Are you sure you want to discard this recording? This action cannot be undone.',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Discard',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              if (isRecording) {
-                await audioRecorderRef.current?.discardRecording();
-              }
-              dispatch(resetAudio());
-              navigation.goBack();
-            } catch (error) {
-              console.error('Failed to discard recording:', error);
-            }
-          },
-        },
-      ]
+      async () => {
+        try {
+          if (isRecording) {
+            await audioRecorderRef.current?.discardRecording();
+          }
+          dispatch(resetAudio());
+          navigation.goBack();
+        } catch (error) {
+          console.error('Failed to discard recording:', error);
+        }
+      }
     );
   };
 
 
-  const formatDuration = (milliseconds: number): string => {
-    const totalSeconds = Math.floor(milliseconds / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    if (hours > 0) {
-      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    }
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  };
 
   if (!template) {
     return (

@@ -2,6 +2,12 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '@theme';
 import { Episode } from '@store/projectsSlice';
+import {
+  formatDuration,
+  formatDate,
+  getEpisodeStatusColor,
+  getEpisodeStatusLabel,
+} from '../utils';
 
 export interface EpisodeCardProps {
   episode: Episode;
@@ -14,47 +20,6 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
   onPress,
   showStatus = true,
 }) => {
-  const formatDate = (timestamp: number): string => {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
-
-  const formatDuration = (milliseconds: number): string => {
-    const totalSeconds = Math.floor(milliseconds / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
-
-  const getStatusColor = (): string => {
-    switch (episode.status) {
-      case 'draft':
-        return colors.warning;
-      case 'processed':
-        return colors.info;
-      case 'exported':
-        return colors.success;
-      default:
-        return colors.textTertiary;
-    }
-  };
-
-  const getStatusLabel = (): string => {
-    switch (episode.status) {
-      case 'draft':
-        return 'Draft';
-      case 'processed':
-        return 'Processed';
-      case 'exported':
-        return 'Exported';
-      default:
-        return episode.status;
-    }
-  };
 
   return (
     <TouchableOpacity
@@ -68,8 +33,8 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
             {episode.title}
           </Text>
           {showStatus && (
-            <View style={[styles.statusBadge, { backgroundColor: getStatusColor() }]}>
-              <Text style={styles.statusText}>{getStatusLabel()}</Text>
+            <View style={[styles.statusBadge, { backgroundColor: getEpisodeStatusColor(episode.status) }]}>
+              <Text style={styles.statusText}>{getEpisodeStatusLabel(episode.status)}</Text>
             </View>
           )}
         </View>

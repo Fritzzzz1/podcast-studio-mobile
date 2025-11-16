@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import {
   EpisodeDetailScreenNavigationProp,
@@ -16,6 +16,12 @@ import {
   LoadingSpinner,
   Input,
 } from '@components';
+import {
+  formatDate,
+  getEpisodeStatusLabel,
+  showDeleteConfirmation,
+  showErrorAlert,
+} from '../utils';
 
 export const EpisodeDetailScreen: React.FC = () => {
   const navigation = useNavigation<EpisodeDetailScreenNavigationProp>();
@@ -147,28 +153,18 @@ export const EpisodeDetailScreen: React.FC = () => {
   };
 
   const handleDeleteEpisode = () => {
-    Alert.alert(
+    showDeleteConfirmation(
       'Delete Episode',
       'Are you sure you want to delete this episode? This action cannot be undone.',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await audioPlayerRef.current?.unloadAudio();
-              dispatch(deleteEpisode({ projectId, episodeId }));
-              navigation.goBack();
-            } catch (error) {
-              console.error('Failed to delete episode:', error);
-            }
-          },
-        },
-      ]
+      async () => {
+        try {
+          await audioPlayerRef.current?.unloadAudio();
+          dispatch(deleteEpisode({ projectId, episodeId }));
+          navigation.goBack();
+        } catch (error) {
+          console.error('Failed to delete episode:', error);
+        }
+      }
     );
   };
 
@@ -181,27 +177,6 @@ export const EpisodeDetailScreen: React.FC = () => {
     );
   }
 
-  const formatDate = (timestamp: number): string => {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
-
-  const getStatusLabel = (): string => {
-    switch (episode.status) {
-      case 'draft':
-        return 'Draft';
-      case 'processed':
-        return 'Processed';
-      case 'exported':
-        return 'Exported';
-      default:
-        return episode.status;
-    }
-  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -284,12 +259,12 @@ export const EpisodeDetailScreen: React.FC = () => {
 
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Status</Text>
-          <Text style={styles.infoValue}>{getStatusLabel()}</Text>
+          <Text style={styles.infoValue}>{getEpisodeStatusLabel(episode.status)}</Text>
         </View>
 
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Recorded</Text>
-          <Text style={styles.infoValue}>{formatDate(episode.recordedAt)}</Text>
+          <Text style={styles.infoValue}>{formatDate(episode.recordedAt, 'long')}</Text>
         </View>
 
         <View style={styles.infoRow}>
